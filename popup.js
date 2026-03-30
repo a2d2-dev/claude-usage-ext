@@ -10,7 +10,7 @@ const USAGE_URL = 'https://claude.ai/settings/usage';
 
 /**
  * Get a localized message string, with optional substitutions.
- * @param {string} key - Message key defined in _locales/*/messages.json
+ * @param {string} key - Message key defined in _locales/{locale}/messages.json
  * @param {string|string[]} [subs] - Substitution value(s)
  * @returns {string}
  */
