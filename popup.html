@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Claude Usage Tracker</title>
+  <style>
+    :root {
+      --bg-0: #0c0c14;
+      --bg-1: #131322;
+      --bg-2: #1c1c34;
+      --bg-3: #262648;
+      --border: #2e2e50;
+      --text-1: #e4e4f0;
+      --text-2: #9898b4;
+      --text-3: #606080;
+      --accent: #c4704b;
+      --accent-dim: rgba(196,112,75,.12);
+      --blue: #5b8fb9;
+      --green: #4caf88;
+      --red: #d94f4f;
+      --yellow: #e6a23c;
+    }
+    * { margin:0;padding:0;box-sizing:border-box; }
+    body {
+      width: 420px;
+      max-height: 580px;
+      overflow-y: auto;
+      background: var(--bg-0);
+      color: var(--text-1);
+      font-family: 'SF Mono','Cascadia Code','Fira Code','Consolas',monospace;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* ── Header ── */
+    .hdr { padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
+    .hdr-left { display:flex;align-items:center;gap:8px; }
+    .logo { width:22px;height:22px;border-radius:5px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff; }
+    .hdr h1 { font-size:13px;font-weight:600;letter-spacing:-.3px; }
+    .hdr-actions { display:flex;gap:5px; }
+    .ib {
+      width:28px;height:28px;border-radius:6px;border:1px solid var(--border);
+      background:var(--bg-1);color:var(--text-2);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:13px;transition:.15s;
+    }
+    .ib:hover { background:var(--bg-2);color:var(--text-1);border-color:var(--accent); }
+
+    /* ── Status ── */
+    .status { padding:7px 16px;font-size:11px;color:var(--text-3);border-bottom:1px solid var(--border);display:flex;justify-content:space-between; }
+    .dot { display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:middle; }
+    .dot-ok { background:var(--green); }
+    .dot-warn { background:var(--yellow); }
+    .dot-off { background:var(--text-3); }
+
+    /* ── Tabs ── */
+    .tabs { display:flex;border-bottom:1px solid var(--border); }
+    .tab {
+      flex:1;padding:9px;text-align:center;font-size:10px;font-weight:600;
+      letter-spacing:.8px;color:var(--text-3);cursor:pointer;
+      border-bottom:2px solid transparent;transition:.15s;
+    }
+    .tab:hover { color:var(--text-2); }
+    .tab.on { color:var(--accent);border-bottom-color:var(--accent); }
+    .pane { display:none; }
+    .pane.on { display:block; }
+
+    /* ── Section ── */
+    .sec { padding:12px 16px;border-bottom:1px solid var(--border); }
+    .sec-t { font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:8px; }
+
+    /* ── Card ── */
+    .card { background:var(--bg-2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;margin-bottom:6px; }
+    .card:last-child { margin-bottom:0; }
+    .card-row { display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
+    .card-label { font-size:12px;font-weight:600; }
+    .card-val { font-size:11px;color:var(--text-2); }
+    .bar-bg { width:100%;height:5px;border-radius:3px;background:var(--bg-0);overflow:hidden; }
+    .bar-fg { height:100%;border-radius:3px;transition:width .5s ease; }
+    .bar-fg.opus { background:var(--accent); }
+    .bar-fg.sonnet { background:var(--blue); }
+    .bar-fg.haiku { background:var(--green); }
+    .bar-fg.default { background:#8080a0; }
+    .bar-fg.danger { background:var(--red); }
+
+    /* ── Chart ── */
+    .chart-wrap { background:var(--bg-1);border:1px solid var(--border);border-radius:7px;padding:10px;overflow:hidden; }
+    canvas { width:100%!important;height:140px!important; }
+
+    /* ── History table ── */
+    .htbl { width:100%;border-collapse:collapse;font-size:11px; }
+    .htbl th { text-align:left;color:var(--text-3);font-weight:600;font-size:10px;padding:4px 6px;border-bottom:1px solid var(--border);letter-spacing:.5px; }
+    .htbl td { padding:5px 6px;border-bottom:1px solid rgba(46,46,80,.3);color:var(--text-2); }
+    .htbl tr:hover td { color:var(--text-1);background:var(--bg-1); }
+
+    /* ── Buttons ── */
+    .btn { display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:5px;border:1px solid var(--accent);background:var(--accent-dim);color:var(--accent);font-size:11px;font-family:inherit;cursor:pointer;transition:.15s; }
+    .btn:hover { background:var(--accent);color:#fff; }
+    .btn-sm { padding:3px 10px;font-size:10px; }
+    .btn-danger { border-color:var(--red);color:var(--red);background:rgba(217,79,79,.08); }
+    .btn-danger:hover { background:var(--red);color:#fff; }
+
+    /* ── Settings ── */
+    .s-row { display:flex;justify-content:space-between;align-items:center;padding:7px 0; }
+    .s-label { font-size:12px;color:var(--text-2); }
+    .toggle { position:relative;width:36px;height:20px; }
+    .toggle input { opacity:0;width:0;height:0; }
+    .slider { position:absolute;inset:0;background:var(--bg-0);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s; }
+    .slider::before { content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:var(--text-3);left:2px;top:2px;transition:.2s; }
+    .toggle input:checked+.slider { background:var(--accent-dim);border-color:var(--accent); }
+    .toggle input:checked+.slider::before { background:var(--accent);transform:translateX(16px); }
+    select { background:var(--bg-2);border:1px solid var(--border);color:var(--text-1);font-family:inherit;font-size:11px;padding:4px 8px;border-radius:4px; }
+
+    /* ── Empty state ── */
+    .empty { padding:30px 16px;text-align:center;color:var(--text-3); }
+    .empty .icon { font-size:28px;margin-bottom:10px; }
+    .empty p { font-size:12px;line-height:1.7;margin-bottom:12px; }
+
+    /* ── Raw preview ── */
+    .raw { background:var(--bg-2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:11px;color:var(--text-3);max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;line-height:1.6; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--border);border-radius:2px; }
+
+    /* ── Stats row ── */
+    .stats { display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px; }
+    .stat { background:var(--bg-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;text-align:center; }
+    .stat-val { font-size:16px;font-weight:700;color:var(--text-1); }
+    .stat-lab { font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-top:2px; }
+  </style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left"><div class="logo">C</div><h1>Usage Tracker</h1></div>
+  <div class="hdr-actions">
+    <button class="ib" id="btn-capture" title="Capture now (opens background tab)">⟳</button>
+    <button class="ib" id="btn-open" title="Open usage page">↗</button>
+  </div>
+</div>
+
+<div class="status">
+  <span><span class="dot dot-off" id="st-dot"></span><span id="st-text">No data</span></span>
+  <span id="st-count"></span>
+</div>
+
+<div class="tabs">
+  <div class="tab on" data-t="now">LATEST</div>
+  <div class="tab" data-t="trend">TREND</div>
+  <div class="tab" data-t="history">HISTORY</div>
+  <div class="tab" data-t="cfg">CONFIG</div>
+</div>
+
+<!-- ── LATEST ── -->
+<div class="pane on" id="p-now">
+  <div id="now-content">
+    <div class="empty" id="empty-state">
+      <div class="icon">📊</div>
+      <p>No usage data yet.<br>Visit the usage page to start tracking.</p>
+      <button class="btn" id="btn-goto">Open Usage Page</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TREND ── -->
+<div class="pane" id="p-trend">
+  <div class="sec">
+    <div class="sec-t">Usage over time</div>
+    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+    <div style="margin-top:8px;font-size:10px;color:var(--text-3)">Based on captured quota percentages. More data = better trends.</div>
+  </div>
+</div>
+
+<!-- ── HISTORY ── -->
+<div class="pane" id="p-history">
+  <div class="sec">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div class="sec-t" style="margin:0">Snapshots</div>
+      <div style="display:flex;gap:5px;">
+        <button class="btn btn-sm" id="btn-csv">CSV</button>
+        <button class="btn btn-sm" id="btn-json">JSON</button>
+        <button class="btn btn-sm btn-danger" id="btn-clear">Clear</button>
+      </div>
+    </div>
+    <div id="hist-list" style="max-height:320px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ── CONFIG ── -->
+<div class="pane" id="p-cfg">
+  <div class="sec">
+    <div class="sec-t">Auto Capture</div>
+    <div class="s-row">
+      <span class="s-label">Enable periodic capture</span>
+      <label class="toggle"><input type="checkbox" id="cfg-auto" checked><span class="slider"></span></label>
+    </div>
+    <div class="s-row">
+      <span class="s-label">Interval</span>
+      <select id="cfg-interval">
+        <option value="15" selected>Every 15 min</option>
+        <option value="30">Every 30 min</option>
+        <option value="60">Every 1h</option>
+        <option value="120">Every 2h</option>
+        <option value="240">Every 4h</option>
+      </select>
+    </div>
+    <div class="s-row">
+      <span class="s-label">Show notifications</span>
+      <label class="toggle"><input type="checkbox" id="cfg-notif"><span class="slider"></span></label>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">About</div>
+    <div style="font-size:11px;color:var(--text-3);line-height:1.7;">
+      All data stays in your browser (chrome.storage.local).<br>
+      No external requests. No telemetry.<br>
+      Max 1500 snapshots (~15 days at 15min).
+    </div>
+  </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
