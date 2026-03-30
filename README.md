@@ -1,110 +1,187 @@
-# Claude Usage Tracker v2 — Chrome Extension
+# Claude Usage Tracker
 
-定期自动采集 claude.ai 订阅用量数据，持久化存储，支持导出分析。
+> Track and understand your Claude.ai subscription usage — automatic, private, and open source.
+>
+> 追踪并分析 Claude.ai 订阅用量 — 自动采集，完全私密，开源代码。
 
-## 架构
+[![Build](https://github.com/a2d2-dev/claude-usage-ext/actions/workflows/build.yml/badge.svg)](https://github.com/a2d2-dev/claude-usage-ext/actions/workflows/build.yml)
+
+**[🌐 Website](https://a2d2-dev.github.io/claude-usage-ext/)** · **[🔒 Privacy Policy](https://a2d2-dev.github.io/claude-usage-ext/privacy.html)** · **[🐛 Report an Issue](https://github.com/a2d2-dev/claude-usage-ext/issues)**
+
+---
+
+## What it does / 功能介绍
+
+Claude's billing model is complex. This Chrome extension makes it simple:
+
+- **Auto-capture** — opens `claude.ai/settings/usage` in a background tab on a schedule, grabs quota data, closes the tab
+- **Trend chart** — visualize usage over time with a built-in canvas chart
+- **History table** — browse and export up to 1500 snapshots (CSV / JSON)
+- **Configurable** — choose capture interval (15 min → 4 h) and optional notifications
+- **i18n** — English and Simplified Chinese; follows your browser language automatically
+- **100% local** — all data in `chrome.storage.local`, no external requests, no telemetry
+
+---
+
+## Architecture / 架构
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  background.js (Service Worker)                     │
-│  ├── chrome.alarms → 每 N 小时触发                   │
-│  ├── 打开后台 tab → claude.ai/settings/usage         │
-│  ├── 等待 content.js 抓取完成                        │
-│  └── 关闭 tab                                       │
-├─────────────────────────────────────────────────────┤
-│  content.js (注入 usage 页面)                        │
-│  ├── 等待 SPA 渲染完成                               │
-│  ├── 启发式提取: progressbar / 百分比 / X of Y / 文本 │
-│  └── 存入 chrome.storage.local                      │
-├─────────────────────────────────────────────────────┤
-│  popup (HTML + JS)                                  │
-│  ├── LATEST: 最新快照                                │
-│  ├── TREND: canvas 趋势图                            │
-│  ├── HISTORY: 快照列表 + CSV/JSON 导出               │
-│  └── CONFIG: 采集间隔 / 通知开关                      │
-└─────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────┐
+│  background.js (Service Worker)                       │
+│  ├── chrome.alarms → triggers every N minutes         │
+│  ├── opens background tab → claude.ai/settings/usage  │
+│  ├── waits for content.js to extract data             │
+│  └── closes the tab                                   │
+├───────────────────────────────────────────────────────┤
+│  content.js (injected into the usage page)            │
+│  ├── waits for SPA rendering to stabilize             │
+│  ├── heuristic extraction:                            │
+│  │     ARIA progressbars / "X of Y" quotas /          │
+│  │     percentage text / raw text sections            │
+│  └── saves snapshot to chrome.storage.local           │
+├───────────────────────────────────────────────────────┤
+│  popup.html + popup.js                                │
+│  ├── LATEST: current snapshot with progress bars      │
+│  ├── TREND:  canvas usage chart over time             │
+│  ├── HISTORY: snapshot table + CSV/JSON export        │
+│  └── CONFIG: capture interval / notifications         │
+└───────────────────────────────────────────────────────┘
 ```
 
-## 安装
+---
 
-1. `chrome://extensions/` → 开启 **开发者模式**
-2. **加载已解压的扩展程序** → 选本文件夹
-3. Pin 到工具栏
+## Install / 安装
 
-## 使用
+### From Chrome Web Store (recommended)
+> Coming soon — link will be added here once published.
 
-### 手动采集
-点击扩展图标 → ↗ 打开 usage 页面 → 自动抓取
+### Developer mode (manual)
 
-### 自动采集
-默认每 4 小时自动在后台标签页打开 usage 页面抓取数据，抓完自动关闭。
-在 CONFIG 标签页可调整间隔（1h / 2h / 4h / 8h / 12h / 24h）。
+1. Download the latest `.zip` from [Releases](https://github.com/a2d2-dev/claude-usage-ext/releases)
+2. Unzip it
+3. Open `chrome://extensions/` → enable **Developer mode**
+4. Click **Load unpacked** → select the unzipped folder
+5. Pin the extension to your toolbar
 
-### 导出分析
-HISTORY 标签页支持:
-- **CSV 导出**: 直接用 Excel / Google Sheets 打开
-- **JSON 导出**: 用 Python / jq 等工具处理
+---
 
-### CSV 字段说明
+## Usage / 使用
 
-| 字段 | 说明 |
-|------|------|
-| timestamp | ISO 8601 采集时间 |
-| plan | 订阅计划 (Pro/Max/...) |
-| reset_info | 配额重置信息 |
-| models | 检测到的模型名称 |
-| quota_labels | 配额描述 (如 "15 of 45 messages") |
-| quota_used | 已用量 |
-| quota_total | 总量 |
-| quota_pct | 使用百分比 |
-| progress_labels | 进度条标签 |
-| progress_values | 进度条值 |
-| raw_first_section | 页面原始文本 (前 200 字) |
+| Action | How |
+|--------|-----|
+| First capture | Visit `claude.ai/settings/usage` — the content script runs automatically |
+| Manual capture | Click the extension icon → press **⟳** |
+| View trends | Click **TREND** tab in the popup |
+| Export data | **HISTORY** tab → CSV or JSON button |
+| Change interval | **CONFIG** tab → Interval dropdown |
+| Clear all data | **HISTORY** tab → Clear button |
 
-### Python 分析示例
+---
+
+## CSV Fields / CSV 字段
+
+| Field | Description |
+|-------|-------------|
+| `timestamp` | ISO 8601 capture time |
+| `plan` | Subscription plan (Free / Pro / Max / …) |
+| `reset_info` | Quota reset information shown on the page |
+| `models` | Detected model names |
+| `quota_labels` | Quota descriptions (e.g. "15 of 45 messages") |
+| `quota_used` | Used amounts |
+| `quota_total` | Total amounts |
+| `quota_pct` | Usage percentages |
+| `progress_labels` | Progress bar labels |
+| `progress_values` | Progress bar values |
+| `raw_first_section` | First 200 chars of raw page text |
+
+### Python analysis example
 
 ```python
 import pandas as pd
 
-df = pd.read_csv('claude-usage-2026-03-30.csv')
+df = pd.read_csv('claude-usage-2025-03-30.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
-
-# 按天聚合平均用量
 df['date'] = df['timestamp'].dt.date
+
 daily = df.groupby('date')['quota_pct'].apply(
     lambda x: x.str.split('; ').explode().astype(float).mean()
 )
 daily.plot(title='Daily Average Usage %')
 ```
 
-## 自定义抓取逻辑
+---
 
-usage 页面的 DOM 结构没有公开文档，首次使用后检查 popup 里的 "Raw Content" 预览：
+## Chrome Web Store Submission Checklist / 上架检查清单
 
-1. 如果看到结构化数据 → 抓取逻辑已能工作
-2. 如果看到的文本不含用量信息 → 需要调整 `content.js` 里的选择器
+- [x] Manifest V3
+- [x] `default_locale` + `_locales/en` + `_locales/zh_CN`
+- [x] Icons: 16×16, 48×48, 128×128
+- [x] `homepage_url` set to GitHub Pages
+- [x] Privacy policy at `https://a2d2-dev.github.io/claude-usage-ext/privacy.html`
+- [x] Minimal permissions (no `<all_urls>`)
+- [ ] Store screenshots (1280×800 or 640×400)
+- [ ] Store listing description (EN + ZH)
+- [ ] Chrome Web Store developer account
 
-调整方法:
-1. 打开 `claude.ai/settings/usage`
-2. F12 → Elements → 找到用量相关的 DOM 元素
-3. 记下 class / id / aria 属性
-4. 修改 `content.js` 中 `extractUsageData()` 的选择器
+---
 
-## 数据存储
+## Development / 开发
 
-- 位置: `chrome.storage.local`（仅浏览器本地）
-- 容量: 最多 2000 条快照（约 6 个月 @4h 间隔）
-- 隐私: 无外部请求，无遥测，无数据上传
+```bash
+# Clone
+git clone https://github.com/a2d2-dev/claude-usage-ext.git
+cd claude-usage-ext
 
-## 文件结构
+# Load in Chrome
+# chrome://extensions/ → Developer mode → Load unpacked → select this folder
+```
+
+**Release a new version:**
+1. Bump `"version"` in `manifest.json`
+2. Commit and push
+3. Create a git tag: `git tag v2.1.0 && git push origin v2.1.0`
+4. GitHub Actions builds the `.zip` and creates a GitHub Release automatically
+
+**Customizing the parser:**
+If the usage page DOM changes:
+1. Open `claude.ai/settings/usage` → F12 → Elements
+2. Find the updated quota/progress elements
+3. Edit `extractUsageData()` in `content.js`
+
+---
+
+## File Structure / 文件结构
 
 ```
 claude-usage-ext/
-├── manifest.json    # V3 manifest
-├── content.js       # 页面抓取 (启发式 DOM 解析)
-├── background.js    # 定时任务 + 后台 tab 管理
-├── popup.html       # 弹窗 UI
-├── popup.js         # 趋势图 + 导出 + 设置
+├── manifest.json       # Manifest V3
+├── background.js       # Alarm scheduler + background tab management
+├── content.js          # Heuristic DOM parser for the usage page
+├── popup.html          # Popup UI (data-i18n attributes)
+├── popup.js            # Trend chart, export, settings, i18n init
 ├── icons/
-└── README.md
+│   ├── icon16.png
+│   ├── icon48.png
+│   └── icon128.png
+├── _locales/
+│   ├── en/messages.json
+│   └── zh_CN/messages.json
+├── docs/               # GitHub Pages (landing page)
+│   ├── index.html
+│   └── privacy.html
+└── .github/
+    └── workflows/
+        └── build.yml   # CI: validate + package + release
 ```
+
+---
+
+## Privacy / 隐私
+
+All data stays in your browser. No servers. No telemetry. See the [full privacy policy](https://a2d2-dev.github.io/claude-usage-ext/privacy.html).
+
+---
+
+## License / 许可
+
+MIT — see [LICENSE](LICENSE)
