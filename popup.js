@@ -6,6 +6,37 @@ const STORAGE_KEY = 'claude_usage_history';
 const SETTINGS_KEY = 'claude_usage_settings';
 const USAGE_URL = 'https://claude.ai/settings/usage';
 
+// ─── i18n helpers ───────────────────────────────────────────────────
+
+/**
+ * Get a localized message string, with optional substitutions.
+ * @param {string} key - Message key defined in _locales/*/messages.json
+ * @param {string|string[]} [subs] - Substitution value(s)
+ * @returns {string}
+ */
+function t(key, subs) {
+  return chrome.i18n.getMessage(key, subs) || key;
+}
+
+/**
+ * Apply i18n to all elements with data-i18n / data-i18n-title attributes.
+ * Called once on load; dynamic content is handled inline via t().
+ */
+function initI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const msg = t(el.dataset.i18n);
+    if (msg) el.textContent = msg;
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const msg = t(el.dataset.i18nTitle);
+    if (msg) el.title = msg;
+  });
+  document.querySelectorAll('option[data-i18n]').forEach(el => {
+    const msg = t(el.dataset.i18n);
+    if (msg) el.textContent = msg;
+  });
+}
+
 // ─── Tabs ───────────────────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -34,19 +65,34 @@ document.getElementById('btn-capture').addEventListener('click', () => {
 // ─── Helpers ────────────────────────────────────────────────────────
 const esc = s => { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
 
+/**
+ * Return a localized "time ago" string for the given ISO timestamp.
+ * @param {string} ts - ISO timestamp string
+ * @returns {string}
+ */
 function timeAgo(ts) {
   const m = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
-  if (m < 1) return 'just now';
-  if (m < 60) return m + 'm ago';
+  if (m < 1) return t('timeJustNow');
+  if (m < 60) return t('timeMinAgo', String(m));
   const h = Math.floor(m / 60);
-  if (h < 24) return h + 'h ago';
-  return Math.floor(h / 24) + 'd ago';
+  if (h < 24) return t('timeHourAgo', String(h));
+  return t('timeDayAgo', String(Math.floor(h / 24)));
 }
 
+/**
+ * Format a timestamp for display using the browser's locale.
+ * @param {string} ts - ISO timestamp string
+ * @returns {string}
+ */
 function fmtTime(ts) {
-  return new Date(ts).toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+  return new Date(ts).toLocaleString(undefined, { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
+/**
+ * Return the CSS class name for a model name string.
+ * @param {string} text
+ * @returns {string}
+ */
 function modelColor(text) {
   const l = (text || '').toLowerCase();
   if (l.includes('opus')) return 'opus';
@@ -65,7 +111,7 @@ function renderLatest(data) {
 
   // Plan
   if (data.plan) {
-    h += `<div class="sec"><div class="sec-t">Plan</div>
+    h += `<div class="sec"><div class="sec-t">${t('sectionPlanLabel')}</div>
       <div style="font-size:15px;font-weight:700">${esc(data.plan)}</div>
       ${data.reset_info ? `<div style="font-size:11px;color:var(--text-3);margin-top:3px">${esc(data.reset_info)}</div>` : ''}
     </div>`;
@@ -73,7 +119,7 @@ function renderLatest(data) {
 
   // Quotas
   if (data.quotas?.length) {
-    h += `<div class="sec"><div class="sec-t">Quotas</div>`;
+    h += `<div class="sec"><div class="sec-t">${t('sectionQuotas')}</div>`;
     data.quotas.forEach(q => {
       const c = q.pct > 80 ? 'danger' : 'default';
       h += `<div class="card"><div class="card-row">
@@ -86,13 +132,13 @@ function renderLatest(data) {
 
   // Progress bars
   if (data.progress_bars?.length) {
-    h += `<div class="sec"><div class="sec-t">Progress</div>`;
+    h += `<div class="sec"><div class="sec-t">${t('sectionProgress')}</div>`;
     data.progress_bars.forEach(b => {
       const c = b.value > 80 ? 'danger' : modelColor(b.label);
       h += `<div class="card"><div class="card-row">
-        <span class="card-label">${esc(b.label || 'Usage')}</span>
+        <span class="card-label">${esc(b.label || t('defaultUsageLabel'))}</span>
         <span class="card-val">${b.value}%</span>
-      </div><div class="bar-bg"><div class="bar-fg ${c}" style="width:${Math.min(b.value,100)}%"></div></div></div>`;
+      </div><div class="bar-bg"><div class="bar-fg ${c}" style="width:${Math.min(b.value, 100)}%"></div></div></div>`;
     });
     h += `</div>`;
   }
@@ -100,7 +146,7 @@ function renderLatest(data) {
   // Raw preview
   if (data.raw_sections?.length) {
     const preview = data.raw_sections.join('\n\n').substring(0, 600);
-    h += `<div class="sec"><div class="sec-t">Raw Content (debug)</div>
+    h += `<div class="sec"><div class="sec-t">${t('sectionRawContent')}</div>
       <div class="raw">${esc(preview)}</div></div>`;
   }
 
@@ -139,7 +185,6 @@ function renderTrend(history) {
   const cw = W - pad.l - pad.r;
   const ch = H - pad.t - pad.b;
 
-  // Background
   ctx.fillStyle = '#131322';
   ctx.fillRect(0, 0, W, H);
 
@@ -147,7 +192,7 @@ function renderTrend(history) {
     ctx.fillStyle = '#606080';
     ctx.font = '11px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('Need more snapshots for trend', W / 2, H / 2);
+    ctx.fillText(t('needMoreSnapshots'), W / 2, H / 2);
     return;
   }
 
@@ -174,10 +219,8 @@ function renderTrend(history) {
   ctx.fillStyle = '#606080';
   ctx.font = '9px monospace';
   ctx.textAlign = 'center';
-  const first = new Date(minT);
-  const last = new Date(maxT);
-  ctx.fillText(fmtTime(first.toISOString()), pad.l, H - 4);
-  ctx.fillText(fmtTime(last.toISOString()), W - pad.r, H - 4);
+  ctx.fillText(fmtTime(new Date(minT).toISOString()), pad.l, H - 4);
+  ctx.fillText(fmtTime(new Date(maxT).toISOString()), W - pad.r, H - 4);
 
   // Danger zone (> 80%)
   ctx.fillStyle = 'rgba(217,79,79,.06)';
@@ -217,13 +260,13 @@ function renderTrend(history) {
 function renderHistory(history) {
   const el = document.getElementById('hist-list');
   if (!history?.length) {
-    el.innerHTML = '<div style="color:var(--text-3);font-size:11px;padding:8px 0">No snapshots yet</div>';
+    el.innerHTML = `<div style="color:var(--text-3);font-size:11px;padding:8px 0">${t('noSnapshotsYet')}</div>`;
     return;
   }
 
   const rows = [...history].reverse().slice(0, 50);
   let h = `<table class="htbl"><thead><tr>
-    <th>TIME</th><th>PLAN</th><th>QUOTAS</th><th>BARS</th>
+    <th>${t('thTime')}</th><th>${t('thPlan')}</th><th>${t('thQuotas')}</th><th>${t('thBars')}</th>
   </tr></thead><tbody>`;
 
   rows.forEach(snap => {
@@ -247,13 +290,18 @@ function updateStatus(history) {
   const text = document.getElementById('st-text');
   const cnt = document.getElementById('st-count');
 
-  if (!history?.length) { dot.className = 'dot dot-off'; text.textContent = 'No data'; cnt.textContent = ''; return; }
+  if (!history?.length) {
+    dot.className = 'dot dot-off';
+    text.textContent = t('statusNoData');
+    cnt.textContent = '';
+    return;
+  }
 
   const last = history[history.length - 1];
   const hrs = (Date.now() - new Date(last.timestamp).getTime()) / 3.6e6;
   dot.className = hrs < 1 ? 'dot dot-ok' : hrs < 8 ? 'dot dot-warn' : 'dot dot-off';
-  text.textContent = 'Last: ' + timeAgo(last.timestamp);
-  cnt.textContent = history.length + ' snapshots';
+  text.textContent = t('statusLast', timeAgo(last.timestamp));
+  cnt.textContent = t('snapshotCount', String(history.length));
 }
 
 // ─── Export: CSV ────────────────────────────────────────────────────
@@ -273,7 +321,9 @@ function exportCSV(history) {
     (s.raw_sections?.[0] || '').replace(/[\n\r,]/g, ' ').substring(0, 200),
   ]);
 
-  const csvContent = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const csvContent = [headers, ...rows]
+    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
   download(csvContent, `claude-usage-${today()}.csv`, 'text/csv');
 }
 
@@ -303,7 +353,7 @@ document.getElementById('btn-json').addEventListener('click', async () => {
 
 // ─── Clear ──────────────────────────────────────────────────────────
 document.getElementById('btn-clear').addEventListener('click', async () => {
-  if (confirm('Clear all usage history? This cannot be undone.')) {
+  if (confirm(t('clearConfirm'))) {
     await chrome.storage.local.set({ [STORAGE_KEY]: [] });
     init();
   }
@@ -337,6 +387,7 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 // ─── Init ───────────────────────────────────────────────────────────
 async function init() {
+  initI18n();
   const r = await chrome.storage.local.get(STORAGE_KEY);
   const history = r[STORAGE_KEY] || [];
   const latest = history.length ? history[history.length - 1] : null;

@@ -133,23 +133,23 @@
 <body>
 
 <div class="hdr">
-  <div class="hdr-left"><div class="logo">C</div><h1>Usage Tracker</h1></div>
+  <div class="hdr-left"><div class="logo">C</div><h1 data-i18n="headerTitle">Usage Tracker</h1></div>
   <div class="hdr-actions">
-    <button class="ib" id="btn-capture" title="Capture now (opens background tab)">⟳</button>
-    <button class="ib" id="btn-open" title="Open usage page">↗</button>
+    <button class="ib" id="btn-capture" data-i18n-title="captureNowTitle" title="Capture now">⟳</button>
+    <button class="ib" id="btn-open" data-i18n-title="openUsagePageTitle" title="Open usage page">↗</button>
   </div>
 </div>
 
 <div class="status">
-  <span><span class="dot dot-off" id="st-dot"></span><span id="st-text">No data</span></span>
+  <span><span class="dot dot-off" id="st-dot"></span><span id="st-text" data-i18n="statusNoData">No data</span></span>
   <span id="st-count"></span>
 </div>
 
 <div class="tabs">
-  <div class="tab on" data-t="now">LATEST</div>
-  <div class="tab" data-t="trend">TREND</div>
-  <div class="tab" data-t="history">HISTORY</div>
-  <div class="tab" data-t="cfg">CONFIG</div>
+  <div class="tab on" data-t="now" data-i18n="tabLatest">LATEST</div>
+  <div class="tab" data-t="trend" data-i18n="tabTrend">TREND</div>
+  <div class="tab" data-t="history" data-i18n="tabHistory">HISTORY</div>
+  <div class="tab" data-t="cfg" data-i18n="tabConfig">CONFIG</div>
 </div>
 
 <!-- ── LATEST ── -->
@@ -157,8 +157,11 @@
   <div id="now-content">
     <div class="empty" id="empty-state">
       <div class="icon">📊</div>
-      <p>No usage data yet.<br>Visit the usage page to start tracking.</p>
-      <button class="btn" id="btn-goto">Open Usage Page</button>
+      <p>
+        <span data-i18n="emptyStateTitle">No usage data yet.</span><br>
+        <span data-i18n="emptyStateSubtitle">Visit the usage page to start tracking.</span>
+      </p>
+      <button class="btn" id="btn-goto" data-i18n="openUsagePageBtn">Open Usage Page</button>
     </div>
   </div>
 </div>
@@ -166,9 +169,9 @@
 <!-- ── TREND ── -->
 <div class="pane" id="p-trend">
   <div class="sec">
-    <div class="sec-t">Usage over time</div>
+    <div class="sec-t" data-i18n="sectionUsageOverTime">Usage over time</div>
     <div class="chart-wrap"><canvas id="chart"></canvas></div>
-    <div style="margin-top:8px;font-size:10px;color:var(--text-3)">Based on captured quota percentages. More data = better trends.</div>
+    <div style="margin-top:8px;font-size:10px;color:var(--text-3)" data-i18n="trendNote">Based on captured quota percentages. More data = better trends.</div>
   </div>
 </div>
 
@@ -176,11 +179,11 @@
 <div class="pane" id="p-history">
   <div class="sec">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <div class="sec-t" style="margin:0">Snapshots</div>
+      <div class="sec-t" style="margin:0" data-i18n="sectionSnapshots">Snapshots</div>
       <div style="display:flex;gap:5px;">
         <button class="btn btn-sm" id="btn-csv">CSV</button>
         <button class="btn btn-sm" id="btn-json">JSON</button>
-        <button class="btn btn-sm btn-danger" id="btn-clear">Clear</button>
+        <button class="btn btn-sm btn-danger" id="btn-clear" data-i18n="btnClear">Clear</button>
       </div>
     </div>
     <div id="hist-list" style="max-height:320px;overflow-y:auto;"></div>
@@ -190,29 +193,29 @@
 <!-- ── CONFIG ── -->
 <div class="pane" id="p-cfg">
   <div class="sec">
-    <div class="sec-t">Auto Capture</div>
+    <div class="sec-t" data-i18n="sectionAutoCapture">Auto Capture</div>
     <div class="s-row">
-      <span class="s-label">Enable periodic capture</span>
+      <span class="s-label" data-i18n="enableAutoCapture">Enable periodic capture</span>
       <label class="toggle"><input type="checkbox" id="cfg-auto" checked><span class="slider"></span></label>
     </div>
     <div class="s-row">
-      <span class="s-label">Interval</span>
+      <span class="s-label" data-i18n="captureInterval">Interval</span>
       <select id="cfg-interval">
-        <option value="15" selected>Every 15 min</option>
-        <option value="30">Every 30 min</option>
-        <option value="60">Every 1h</option>
-        <option value="120">Every 2h</option>
-        <option value="240">Every 4h</option>
+        <option value="15" data-i18n="interval15min">Every 15 min</option>
+        <option value="30" data-i18n="interval30min">Every 30 min</option>
+        <option value="60" data-i18n="interval1h">Every 1 hour</option>
+        <option value="120" data-i18n="interval2h">Every 2 hours</option>
+        <option value="240" data-i18n="interval4h">Every 4 hours</option>
       </select>
     </div>
     <div class="s-row">
-      <span class="s-label">Show notifications</span>
+      <span class="s-label" data-i18n="showNotifications">Show notifications</span>
       <label class="toggle"><input type="checkbox" id="cfg-notif"><span class="slider"></span></label>
     </div>
   </div>
   <div class="sec">
-    <div class="sec-t">About</div>
-    <div style="font-size:11px;color:var(--text-3);line-height:1.7;">
+    <div class="sec-t" data-i18n="sectionAbout">About</div>
+    <div style="font-size:11px;color:var(--text-3);line-height:1.7;" data-i18n="aboutText">
       All data stays in your browser (chrome.storage.local).<br>
       No external requests. No telemetry.<br>
       Max 1500 snapshots (~15 days at 15min).

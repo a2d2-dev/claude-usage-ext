@@ -1,0 +1,80 @@
+{
+  "extName":              { "message": "Claude 用量追踪器" },
+  "extDescription":       { "message": "追踪并分析 Claude.ai 订阅用量。自动采集配额数据、可视化趋势并支持导出历史记录。所有数据仅存储在本地。" },
+
+  "headerTitle":          { "message": "用量追踪" },
+  "captureNowTitle":      { "message": "立即采集" },
+  "openUsagePageTitle":   { "message": "打开用量页面" },
+
+  "tabLatest":            { "message": "最新" },
+  "tabTrend":             { "message": "趋势" },
+  "tabHistory":           { "message": "历史" },
+  "tabConfig":            { "message": "设置" },
+
+  "statusNoData":         { "message": "暂无数据" },
+  "statusLast": {
+    "message": "上次：$WHEN$",
+    "placeholders": { "when": { "content": "$1", "example": "2小时前" } }
+  },
+  "snapshotCount": {
+    "message": "$COUNT$ 条记录",
+    "placeholders": { "count": { "content": "$1", "example": "42" } }
+  },
+
+  "emptyStateTitle":      { "message": "暂无用量数据。" },
+  "emptyStateSubtitle":   { "message": "请访问用量页面以开始追踪。" },
+  "openUsagePageBtn":     { "message": "打开用量页面" },
+
+  "sectionUsageOverTime": { "message": "用量趋势" },
+  "trendNote":            { "message": "基于已采集的配额百分比。数据越多，趋势越准确。" },
+  "needMoreSnapshots":    { "message": "需要更多快照才能显示趋势" },
+
+  "sectionSnapshots":     { "message": "快照记录" },
+  "btnClear":             { "message": "清空" },
+  "noSnapshotsYet":       { "message": "暂无快照记录" },
+  "clearConfirm":         { "message": "确定清空所有用量历史？此操作不可撤销。" },
+  "thTime":               { "message": "时间" },
+  "thPlan":               { "message": "计划" },
+  "thQuotas":             { "message": "配额" },
+  "thBars":               { "message": "进度" },
+
+  "sectionAutoCapture":   { "message": "自动采集" },
+  "enableAutoCapture":    { "message": "启用定期采集" },
+  "captureInterval":      { "message": "采集间隔" },
+  "interval15min":        { "message": "每 15 分钟" },
+  "interval30min":        { "message": "每 30 分钟" },
+  "interval1h":           { "message": "每 1 小时" },
+  "interval2h":           { "message": "每 2 小时" },
+  "interval4h":           { "message": "每 4 小时" },
+  "showNotifications":    { "message": "显示通知" },
+
+  "sectionAbout":         { "message": "关于" },
+  "aboutText":            { "message": "所有数据保存在您的浏览器（chrome.storage.local）。无外部请求，无遥测，无数据上传。最多保存 1500 条快照（15 分钟间隔约 15 天）。" },
+
+  "sectionPlanLabel":     { "message": "订阅计划" },
+  "sectionQuotas":        { "message": "配额" },
+  "sectionProgress":      { "message": "进度" },
+  "sectionRawContent":    { "message": "原始内容（调试）" },
+  "defaultUsageLabel":    { "message": "用量" },
+
+  "timeJustNow":          { "message": "刚刚" },
+  "timeMinAgo": {
+    "message": "$M$ 分钟前",
+    "placeholders": { "m": { "content": "$1", "example": "5" } }
+  },
+  "timeHourAgo": {
+    "message": "$H$ 小时前",
+    "placeholders": { "h": { "content": "$1", "example": "3" } }
+  },
+  "timeDayAgo": {
+    "message": "$D$ 天前",
+    "placeholders": { "d": { "content": "$1", "example": "2" } }
+  },
+
+  "notifTitle":           { "message": "Claude 用量已采集" },
+  "notifMessage": {
+    "message": "快照已于 $TIME$ 保存",
+    "placeholders": { "time": { "content": "$1", "example": "09:15:00" } }
+  },
+  "toastCaptured":        { "message": "✓ 用量已采集" }
+}

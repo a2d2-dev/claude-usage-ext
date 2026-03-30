@@ -160,7 +160,7 @@
   }
 
   // ─── Toast badge ──────────────────────────────────────────────────
-  function showBadge(text = '✓ Usage captured') {
+  function showBadge(text = chrome.i18n.getMessage('toastCaptured') || '✓ Usage captured') {
     const el = document.createElement('div');
     el.textContent = text;
     el.style.cssText = `

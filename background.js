@@ -72,8 +72,8 @@ async function performCapture(settings) {
         chrome.notifications.create('capture-done-' + Date.now(), {
           type: 'basic',
           iconUrl: 'icons/icon128.png',
-          title: 'Claude Usage Captured',
-          message: `Snapshot saved at ${new Date().toLocaleTimeString()}`,
+          title: chrome.i18n.getMessage('notifTitle'),
+          message: chrome.i18n.getMessage('notifMessage', new Date().toLocaleTimeString()),
         });
       }
     }

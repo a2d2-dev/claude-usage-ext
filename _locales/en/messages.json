@@ -1,0 +1,80 @@
+{
+  "extName":              { "message": "Claude Usage Tracker" },
+  "extDescription":       { "message": "Track and analyze your Claude.ai subscription usage. Auto-captures quota data, visualizes trends, and exports history. All data stays local." },
+
+  "headerTitle":          { "message": "Usage Tracker" },
+  "captureNowTitle":      { "message": "Capture now" },
+  "openUsagePageTitle":   { "message": "Open usage page" },
+
+  "tabLatest":            { "message": "LATEST" },
+  "tabTrend":             { "message": "TREND" },
+  "tabHistory":           { "message": "HISTORY" },
+  "tabConfig":            { "message": "CONFIG" },
+
+  "statusNoData":         { "message": "No data" },
+  "statusLast": {
+    "message": "Last: $WHEN$",
+    "placeholders": { "when": { "content": "$1", "example": "2h ago" } }
+  },
+  "snapshotCount": {
+    "message": "$COUNT$ snapshots",
+    "placeholders": { "count": { "content": "$1", "example": "42" } }
+  },
+
+  "emptyStateTitle":      { "message": "No usage data yet." },
+  "emptyStateSubtitle":   { "message": "Visit the usage page to start tracking." },
+  "openUsagePageBtn":     { "message": "Open Usage Page" },
+
+  "sectionUsageOverTime": { "message": "Usage over time" },
+  "trendNote":            { "message": "Based on captured quota percentages. More data = better trends." },
+  "needMoreSnapshots":    { "message": "Need more snapshots for trend" },
+
+  "sectionSnapshots":     { "message": "Snapshots" },
+  "btnClear":             { "message": "Clear" },
+  "noSnapshotsYet":       { "message": "No snapshots yet" },
+  "clearConfirm":         { "message": "Clear all usage history? This cannot be undone." },
+  "thTime":               { "message": "TIME" },
+  "thPlan":               { "message": "PLAN" },
+  "thQuotas":             { "message": "QUOTAS" },
+  "thBars":               { "message": "BARS" },
+
+  "sectionAutoCapture":   { "message": "Auto Capture" },
+  "enableAutoCapture":    { "message": "Enable periodic capture" },
+  "captureInterval":      { "message": "Interval" },
+  "interval15min":        { "message": "Every 15 min" },
+  "interval30min":        { "message": "Every 30 min" },
+  "interval1h":           { "message": "Every 1 hour" },
+  "interval2h":           { "message": "Every 2 hours" },
+  "interval4h":           { "message": "Every 4 hours" },
+  "showNotifications":    { "message": "Show notifications" },
+
+  "sectionAbout":         { "message": "About" },
+  "aboutText":            { "message": "All data stays in your browser (chrome.storage.local). No external requests. No telemetry. Max 1500 snapshots (~15 days at 15 min intervals)." },
+
+  "sectionPlanLabel":     { "message": "PLAN" },
+  "sectionQuotas":        { "message": "QUOTAS" },
+  "sectionProgress":      { "message": "PROGRESS" },
+  "sectionRawContent":    { "message": "Raw Content (debug)" },
+  "defaultUsageLabel":    { "message": "Usage" },
+
+  "timeJustNow":          { "message": "just now" },
+  "timeMinAgo": {
+    "message": "$M$m ago",
+    "placeholders": { "m": { "content": "$1", "example": "5" } }
+  },
+  "timeHourAgo": {
+    "message": "$H$h ago",
+    "placeholders": { "h": { "content": "$1", "example": "3" } }
+  },
+  "timeDayAgo": {
+    "message": "$D$d ago",
+    "placeholders": { "d": { "content": "$1", "example": "2" } }
+  },
+
+  "notifTitle":           { "message": "Claude Usage Captured" },
+  "notifMessage": {
+    "message": "Snapshot saved at $TIME$",
+    "placeholders": { "time": { "content": "$1", "example": "09:15:00" } }
+  },
+  "toastCaptured":        { "message": "✓ Usage captured" }
+}
