@@ -1,5 +1,5 @@
 /**
- * Claude Usage Tracker v2 — Popup
+ * Claude Usage Tracker — Popup
  */
 
 const STORAGE_KEY = 'claude_usage_history';

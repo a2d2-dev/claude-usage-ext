@@ -1,5 +1,5 @@
 /**
- * Claude Usage Tracker v2 — Background Service Worker
+ * Claude Usage Tracker — Background Service Worker
  *
  * Periodically opens claude.ai/settings/usage in a background tab,
  * waits for the content script to extract data, then closes the tab.
