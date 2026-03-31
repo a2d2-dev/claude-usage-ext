@@ -1,5 +1,5 @@
 /**
- * Claude Usage Tracker v2 — Content Script
+ * Claude Usage Tracker — Content Script
  *
  * Extracts structured usage data from claude.ai/settings/usage.
  * Works in two modes:

@@ -139,7 +139,7 @@ cd claude-usage-ext
 **Release a new version:**
 1. Bump `"version"` in `manifest.json`
 2. Commit and push
-3. Create a git tag: `git tag v2.1.0 && git push origin v2.1.0`
+3. Create a git tag: `git tag v1.1.0 && git push origin v1.1.0`
 4. GitHub Actions builds the `.zip` and creates a GitHub Release automatically
 
 **Customizing the parser:**
